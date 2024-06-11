@@ -1,117 +1,125 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React, {useEffect, useState} from 'react';
+import {StyleSheet, Text, Button, View} from 'react-native';
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+import SQLite from 'react-native-sqlite-storage';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+// Define the prop interface.
+interface GreetingProps {
+  username: string;
+}
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+// Changes depending if the user is logged.
+const Greeting: React.FC<GreetingProps> = ({username}) => {
+  if (username.length > 0) {
+    return <Text>Logged In as: {username}</Text>;
+  } else {
+    return <Text>You need to LogIn.</Text>;
+  }
+};
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+function App(): React.JSX.Element {
+  const [username, setUsername] = useState('');
+  const db = SQLite.openDatabase(
+    {
+      name: 'MainDB',
+      location: 'default',
+    },
+    () => {
+      console.log('DB created');
+    },
+    error => {
+      console.log(error);
+    },
+  );
+
+  const createTable = () => {
+    db.transaction(tx => {
+      tx.executeSql(
+        'CREATE TABLE IF NOT EXISTS Users (ID INTEGER PRIMARY KEY AUTOINCREMENT, Name TEXT, Password TEXT);',
+      );
+    });
+  };
+
+  const register = async (name: String, password: String) => {
+    await db.transaction(async tx => {
+      tx.executeSql('INSERT INTO Users (Name, Password) VALUES (?, ?)', [
+        name,
+        password,
+      ]);
+    });
+  };
+
+  const deleteUsers = () => {
+    db.transaction(tx => {
+      tx.executeSql('DELETE FROM Users');
+    });
+  };
+
+  const login = async (name: String, password: String) => {
+    await db.transaction(async tx => {
+      tx.executeSql(
+        "SELECT * FROM Users WHERE Name = '" +
+          name +
+          "' AND Password = '" +
+          password +
+          "'",
+        [],
+        (_tx, results) => {
+          const len = results.rows.length;
+          console.log('longitud: ' + len);
+          if (len > 0) {
+            setUsername(results.rows.item(0).Name);
+          } else {
+            setUsername('');
+          }
+        },
+      );
+    });
+  };
+
+  useEffect(() => {
+    createTable();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
+    <View style={styles.container}>
+      <Text style={styles.centeredText}>Register</Text>
+      <Button
+        onPress={() => {
+          createTable();
+          register('Andy', '1234');
+        }}
+        title="Register"
+      />
+      <Text style={styles.centeredText}>Login</Text>
+      <Button
+        onPress={() => {
+          login('Andy', '1234');
+        }}
+        title="Login"
+      />
+      <Greeting username={username} />
+      <Button
+        onPress={() => {
+          deleteUsers();
+        }}
+        color={'red'}
+        title="Delete all data in Users"
+      />
     </View>
   );
 }
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-}
-
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  container: {
+    flex: 1,
+    justifyContent: 'space-around',
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
+  centeredText: {
+    fontSize: 40,
+    alignSelf: 'center',
   },
 });
 
