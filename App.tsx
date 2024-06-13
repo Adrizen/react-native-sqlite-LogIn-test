@@ -1,17 +1,22 @@
 import React, {useEffect, useState} from 'react';
-import {StyleSheet, Text, Button, View} from 'react-native';
+import {StyleSheet, Text, Button, View, TextInput} from 'react-native';
 
 import SQLite from 'react-native-sqlite-storage';
 
 // Define the prop interface.
 interface GreetingProps {
   username: string;
+  style?: React.CSSProperties;
 }
 
 // Changes depending if the user is logged.
 const Greeting: React.FC<GreetingProps> = ({username}) => {
   if (username.length > 0) {
-    return <Text>Logged In as: {username}</Text>;
+    return (
+      <View>
+        <Text>Logged In as: {username}</Text>
+      </View>
+    );
   } else {
     return <Text>You need to LogIn.</Text>;
   }
@@ -19,6 +24,7 @@ const Greeting: React.FC<GreetingProps> = ({username}) => {
 
 function App(): React.JSX.Element {
   const [username, setUsername] = useState('');
+  //const [password, setPassword] = useState('');
   const db = SQLite.openDatabase(
     {
       name: 'MainDB',
@@ -86,6 +92,17 @@ function App(): React.JSX.Element {
   return (
     <View style={styles.container}>
       <Text style={styles.centeredText}>Register</Text>
+      <TextInput
+        onChangeText={newText => setUsername(newText)}
+        style={styles.inputText}
+        placeholder="Username"
+      />
+      <TextInput
+        //onChangeText={newText => setPassword(newText)}
+        secureTextEntry={true}
+        style={styles.inputText}
+        placeholder="Password"
+      />
       <Button
         onPress={() => {
           createTable();
@@ -93,14 +110,13 @@ function App(): React.JSX.Element {
         }}
         title="Register"
       />
-      <Text style={styles.centeredText}>Login</Text>
       <Button
         onPress={() => {
           login('Andy', '1234');
         }}
         title="Login"
       />
-      <Greeting username={username} />
+      <Greeting style={{fontSize: 30}} username={username} />
       <Button
         onPress={() => {
           deleteUsers();
@@ -116,6 +132,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'space-around',
+  },
+  inputText: {
+    height: 40,
+    paddingLeft: 30,
+    fontSize: 15,
   },
   centeredText: {
     fontSize: 40,
