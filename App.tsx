@@ -1,30 +1,48 @@
-import React, {useEffect, useState} from 'react';
-import {StyleSheet, Text, Button, View, TextInput} from 'react-native';
+import React, {useEffect, useState, useRef} from 'react';
+import {
+  StyleSheet,
+  Text,
+  Button,
+  View,
+  TextInput,
+  Alert,
+  TextStyle,
+  ViewStyle,
+  ImageBackground,
+} from 'react-native';
 
 import SQLite from 'react-native-sqlite-storage';
 
 // Define the prop interface.
 interface GreetingProps {
   username: string;
-  style?: React.CSSProperties;
+  loggedIn: boolean;
+  greetingStyle?: TextStyle | ViewStyle;
 }
 
 // Changes depending if the user is logged.
-const Greeting: React.FC<GreetingProps> = ({username}) => {
-  if (username.length > 0) {
+const Greeting: React.FC<GreetingProps> = ({
+  loggedIn,
+  username,
+  greetingStyle,
+}) => {
+  if (loggedIn) {
     return (
       <View>
-        <Text>Logged In as: {username}</Text>
+        <Text style={greetingStyle}>Logged In as: {username}</Text>
       </View>
     );
   } else {
-    return <Text>You need to LogIn.</Text>;
+    return <Text style={greetingStyle}>You need to LogIn.</Text>;
   }
 };
 
 function App(): React.JSX.Element {
   const [username, setUsername] = useState('');
-  //const [password, setPassword] = useState('');
+  const [password, setPassword] = useState('');
+  const [loggedIn, setLoggedIn] = useState(false);
+  const usernameRef = useRef<TextInput>(null);
+  const passwordRef = useRef<TextInput>(null);
   const db = SQLite.openDatabase(
     {
       name: 'MainDB',
@@ -46,13 +64,29 @@ function App(): React.JSX.Element {
     });
   };
 
-  const register = async (name: String, password: String) => {
-    await db.transaction(async tx => {
-      tx.executeSql('INSERT INTO Users (Name, Password) VALUES (?, ?)', [
-        name,
-        password,
-      ]);
-    });
+  const register = async () => {
+    if (username.length > 0 && password.length > 0) {
+      await db.transaction(async tx => {
+        tx.executeSql('INSERT INTO Users (Name, Password) VALUES (?, ?)', [
+          username,
+          password,
+        ]);
+      });
+      // Reset both.
+      setUsername('');
+      setPassword('');
+    } else {
+      Alert.alert(
+        'Data missing',
+        'You need to complete username and password',
+        [
+          {
+            text: 'OK',
+            //onPress: () => console.log('OK pressed'),
+          },
+        ],
+      );
+    }
   };
 
   const deleteUsers = () => {
@@ -61,26 +95,48 @@ function App(): React.JSX.Element {
     });
   };
 
-  const login = async (name: String, password: String) => {
+  const login = async () => {
     await db.transaction(async tx => {
-      tx.executeSql(
-        "SELECT * FROM Users WHERE Name = '" +
-          name +
-          "' AND Password = '" +
-          password +
-          "'",
-        [],
-        (_tx, results) => {
-          const len = results.rows.length;
-          console.log('longitud: ' + len);
-          if (len > 0) {
-            setUsername(results.rows.item(0).Name);
-          } else {
-            setUsername('');
-          }
-        },
-      );
+      if (username.length > 0 && password.length > 0) {
+        tx.executeSql(
+          "SELECT * FROM Users WHERE Name = '" +
+            username +
+            "' AND Password = '" +
+            password +
+            "'",
+          [],
+          (_tx, results) => {
+            const len = results.rows.length;
+            console.log('longitud: ' + len);
+            if (len > 0) {
+              setLoggedIn(true);
+            }
+          },
+        );
+        // Reset password.
+        setPassword('');
+      } else {
+        Alert.alert(
+          'Data missing',
+          'You need to complete username and password',
+          [
+            {
+              text: 'OK',
+              //onPress: () => console.log('OK pressed'),
+            },
+          ],
+        );
+      }
     });
+  };
+
+  const clearTextInput = () => {
+    if (usernameRef.current) {
+      usernameRef.current.clear();
+    }
+    if (passwordRef.current) {
+      passwordRef.current.clear();
+    }
   };
 
   useEffect(() => {
@@ -91,39 +147,57 @@ function App(): React.JSX.Element {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.centeredText}>Register</Text>
-      <TextInput
-        onChangeText={newText => setUsername(newText)}
-        style={styles.inputText}
-        placeholder="Username"
-      />
-      <TextInput
-        //onChangeText={newText => setPassword(newText)}
-        secureTextEntry={true}
-        style={styles.inputText}
-        placeholder="Password"
-      />
-      <Button
-        onPress={() => {
-          createTable();
-          register('Andy', '1234');
-        }}
-        title="Register"
-      />
-      <Button
-        onPress={() => {
-          login('Andy', '1234');
-        }}
-        title="Login"
-      />
-      <Greeting style={{fontSize: 30}} username={username} />
-      <Button
-        onPress={() => {
-          deleteUsers();
-        }}
-        color={'red'}
-        title="Delete all data in Users"
-      />
+      <ImageBackground
+        source={require('../Sqlite/src/assets/img/login.jpg')}
+        resizeMode="cover"
+        style={styles.image}>
+        <Text style={styles.mainText}>Register/LogIn</Text>
+        <Greeting
+          greetingStyle={styles.greetingMessage}
+          loggedIn={loggedIn}
+          username={username}
+        />
+        <TextInput
+          ref={usernameRef}
+          onChangeText={newText => setUsername(newText)}
+          style={styles.inputText}
+          placeholder="Username"
+          placeholderTextColor={'white'}
+        />
+        <TextInput
+          ref={passwordRef}
+          onChangeText={newText => setPassword(newText)}
+          secureTextEntry={true}
+          style={styles.inputText}
+          placeholder="Password"
+          placeholderTextColor={'white'}
+        />
+        <View style={styles.buttonContainer}>
+          <Button
+            onPress={() => {
+              createTable();
+              register();
+              clearTextInput();
+            }}
+            title="Register"
+          />
+          <Button
+            onPress={() => {
+              login();
+              clearTextInput();
+            }}
+            title="Login"
+          />
+          <Button
+            onPress={() => {
+              deleteUsers();
+              setLoggedIn(false);
+            }}
+            color={'red'}
+            title="Delete all data in Users"
+          />
+        </View>
+      </ImageBackground>
     </View>
   );
 }
@@ -133,14 +207,36 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'space-around',
   },
+  buttonContainer: {
+    margin: 20,
+  },
   inputText: {
     height: 40,
-    paddingLeft: 30,
+    margin: 20,
+    borderBottomWidth: 0.7,
+    borderColor: 'white',
     fontSize: 15,
+    color: 'white',
   },
-  centeredText: {
+  mainText: {
+    fontSize: 40,
+    fontStyle: 'italic',
+    alignSelf: 'center',
+    color: 'black',
+    fontWeight: '800',
+  },
+  greetingMessage: {
     fontSize: 40,
     alignSelf: 'center',
+    color: 'rgba(0, 246, 53, 0.9)',
+    fontWeight: '600',
+    textShadowColor: 'black',
+    textShadowOffset: {width: 2, height: 2},
+    textShadowRadius: 10,
+  },
+  image: {
+    flex: 1,
+    justifyContent: 'center',
   },
 });
 
