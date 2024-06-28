@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, {useEffect, useState, useRef} from 'react';
 import {
   StyleSheet,
@@ -158,16 +157,77 @@ function App(): React.JSX.Element {
   // eslint-disable-next-line react/no-unstable-nested-components
   const HomeScreen = ({navigation}: {navigation: any}) => {
     return (
-      <Button
-        title="Go to Andy profile"
-        onPress={() => navigation.navigate('Profile', {name: 'Andy'})}
-      />
+      <View style={styles.buttonContainer}>
+        {/* TODO: Meterle un buen fondo de pantallita. */}
+        <Button
+          title="Start game"
+          // onPress={() => navigation.navigate('Login', {name: 'Andy'})}
+          onPress={() => navigation.navigate('Login')}
+        />
+      </View>
     );
   };
 
-  // eslint-disable-next-line react/no-unstable-nested-components
-  const ProfileScreen = ({route}: {route: any}) => {
-    return <Text>This is {route.params.name}'s profile</Text>;
+  // const ProfileScreen = ({route}: {route: any}) => {
+  //   return <Text>This is {route.params.name}'s profile</Text>;
+  // };
+
+  const LoginScreen = () => {
+    return (
+      <View style={styles.container}>
+        <ImageBackground
+          source={require('../Sqlite/src/assets/img/login.jpg')}
+          resizeMode="cover"
+          style={styles.image}>
+          <Text style={styles.mainText}>Register/LogIn</Text>
+          <Greeting
+            greetingStyle={styles.greetingMessage}
+            loggedIn={loggedIn}
+            username={username}
+          />
+          <TextInput
+            ref={usernameRef}
+            onChangeText={newText => setUsername(newText)}
+            style={styles.inputText}
+            placeholder="Username"
+            placeholderTextColor={'white'}
+          />
+          <TextInput
+            ref={passwordRef}
+            onChangeText={newText => setPassword(newText)}
+            secureTextEntry={true}
+            style={styles.inputText}
+            placeholder="Password"
+            placeholderTextColor={'white'}
+          />
+          <View style={styles.buttonContainer}>
+            <Button
+              onPress={() => {
+                createTable();
+                register();
+                clearTextInput();
+              }}
+              title="Register"
+            />
+            <Button
+              onPress={() => {
+                login();
+                clearTextInput();
+              }}
+              title="Login"
+            />
+            <Button
+              onPress={() => {
+                deleteUsers();
+                setLoggedIn(false);
+              }}
+              color={'red'}
+              title="Delete all data in Users"
+            />
+          </View>
+        </ImageBackground>
+      </View>
+    );
   };
 
   return (
@@ -176,103 +236,51 @@ function App(): React.JSX.Element {
         <Stack.Screen
           name="Home"
           component={HomeScreen}
-          options={{title: 'Welcome'}}
+          options={{title: 'Galaxy warriors'}}
         />
-        <Stack.Screen name="Profile" component={ProfileScreen} />
-        {/* <View style={styles.container}>
-          <ImageBackground
-            source={require('../Sqlite/src/assets/img/login.jpg')}
-            resizeMode="cover"
-            style={styles.image}>
-            <Text style={styles.mainText}>Register/LogIn</Text>
-            <Greeting
-              greetingStyle={styles.greetingMessage}
-              loggedIn={loggedIn}
-              username={username}
-            />
-            <TextInput
-              ref={usernameRef}
-              onChangeText={newText => setUsername(newText)}
-              style={styles.inputText}
-              placeholder="Username"
-              placeholderTextColor={'white'}
-            />
-            <TextInput
-              ref={passwordRef}
-              onChangeText={newText => setPassword(newText)}
-              secureTextEntry={true}
-              style={styles.inputText}
-              placeholder="Password"
-              placeholderTextColor={'white'}
-            />
-            <View style={styles.buttonContainer}>
-              <Button
-                onPress={() => {
-                  createTable();
-                  register();
-                  clearTextInput();
-                }}
-                title="Register"
-              />
-              <Button
-                onPress={() => {
-                  login();
-                  clearTextInput();
-                }}
-                title="Login"
-              />
-              <Button
-                onPress={() => {
-                  deleteUsers();
-                  setLoggedIn(false);
-                }}
-                color={'red'}
-                title="Delete all data in Users"
-              />
-            </View>
-          </ImageBackground>
-        </View> */}
+        {/* <Stack.Screen name="Profile" component={ProfileScreen} /> */}
+        <Stack.Screen name="Login" component={LoginScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
 
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     justifyContent: 'space-around',
-//   },
-//   buttonContainer: {
-//     margin: 20,
-//   },
-//   inputText: {
-//     height: 40,
-//     margin: 20,
-//     borderBottomWidth: 0.7,
-//     borderColor: 'white',
-//     fontSize: 15,
-//     color: 'white',
-//   },
-//   mainText: {
-//     fontSize: 40,
-//     fontStyle: 'italic',
-//     alignSelf: 'center',
-//     color: 'black',
-//     fontWeight: '800',
-//   },
-//   greetingMessage: {
-//     fontSize: 40,
-//     alignSelf: 'center',
-//     color: 'rgba(0, 246, 53, 0.9)',
-//     fontWeight: '600',
-//     textShadowColor: 'black',
-//     textShadowOffset: {width: 2, height: 2},
-//     textShadowRadius: 10,
-//   },
-//   image: {
-//     flex: 1,
-//     justifyContent: 'center',
-//   },
-// });
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'space-around',
+  },
+  buttonContainer: {
+    margin: 20,
+  },
+  inputText: {
+    height: 40,
+    margin: 20,
+    borderBottomWidth: 0.7,
+    borderColor: 'white',
+    fontSize: 15,
+    color: 'white',
+  },
+  mainText: {
+    fontSize: 40,
+    fontStyle: 'italic',
+    alignSelf: 'center',
+    color: 'black',
+    fontWeight: '800',
+  },
+  greetingMessage: {
+    fontSize: 40,
+    alignSelf: 'center',
+    color: 'rgba(0, 246, 53, 0.9)',
+    fontWeight: '600',
+    textShadowColor: 'black',
+    textShadowOffset: {width: 2, height: 2},
+    textShadowRadius: 10,
+  },
+  image: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+});
 
 export default App;
