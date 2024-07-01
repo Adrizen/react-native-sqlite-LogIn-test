@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, {useEffect, useState, useRef} from 'react';
 import {
   StyleSheet,
@@ -162,7 +163,7 @@ function App(): React.JSX.Element {
         <Button
           title="Start game"
           // onPress={() => navigation.navigate('Login', {name: 'Andy'})}
-          onPress={() => navigation.navigate('Login')}
+          onPress={() => navigation.navigate('Test2')}
         />
       </View>
     );
@@ -239,11 +240,183 @@ function App(): React.JSX.Element {
           options={{title: 'Galaxy warriors'}}
         />
         {/* <Stack.Screen name="Profile" component={ProfileScreen} /> */}
-        <Stack.Screen name="Login" component={LoginScreen} />
+        {/* <Stack.Screen name="Test" component={Test} /> */}
+        <Stack.Screen name="Test2" component={Test2} />
+        {/* <Stack.Screen name="Login" component={LoginScreen} /> */}
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
+
+// Sacar componente entero de pantalla logueo pa afuera para evitar error de ESLINT.
+// TODO: Testear después si se puede usar este componente en el APP tal como se usa el componente Test.
+const Test2 = () => {
+  // FIXME: 1° User logs in successfully. 2° Writes another username in the input. 3° The "Logged In as: [name]" changes in real time.
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [loggedIn, setLoggedIn] = useState(false);
+  const usernameRef = useRef<TextInput>(null);
+  const passwordRef = useRef<TextInput>(null);
+  const db = SQLite.openDatabase(
+    {
+      name: 'MainDB',
+      location: 'default',
+    },
+    () => {
+      console.log('DB created');
+    },
+    error => {
+      console.log(error);
+    },
+  );
+
+  const createTable = () => {
+    db.transaction(tx => {
+      tx.executeSql(
+        'CREATE TABLE IF NOT EXISTS Users (ID INTEGER PRIMARY KEY AUTOINCREMENT, Name TEXT, Password TEXT);',
+      );
+    });
+  };
+
+  const register = async () => {
+    if (username.length > 0 && password.length > 0) {
+      await db.transaction(async tx => {
+        tx.executeSql('INSERT INTO Users (Name, Password) VALUES (?, ?)', [
+          username,
+          password,
+        ]);
+      });
+      // Reset both.
+      setUsername('');
+      setPassword('');
+    } else {
+      Alert.alert(
+        'Data missing',
+        'You need to complete username and password',
+        [
+          {
+            text: 'OK',
+            //onPress: () => console.log('OK pressed'),
+          },
+        ],
+      );
+    }
+  };
+
+  const deleteUsers = () => {
+    db.transaction(tx => {
+      tx.executeSql('DELETE FROM Users');
+    });
+  };
+
+  const login = async () => {
+    await db.transaction(async tx => {
+      if (username.length > 0 && password.length > 0) {
+        tx.executeSql(
+          "SELECT * FROM Users WHERE Name = '" +
+            username +
+            "' AND Password = '" +
+            password +
+            "'",
+          [],
+          (_tx, results) => {
+            const len = results.rows.length;
+            console.log('longitud: ' + len);
+            if (len > 0) {
+              setLoggedIn(true);
+            } else {
+              Alert.alert('Wrong data', 'Username or password is not valid', [
+                {text: 'OK'},
+              ]);
+            }
+          },
+        );
+        // Reset password.
+        setPassword('');
+      } else {
+        Alert.alert(
+          'Data missing',
+          'You need to complete username and password',
+          [
+            {
+              text: 'OK',
+              //onPress: () => console.log('OK pressed'),
+            },
+          ],
+        );
+      }
+    });
+  };
+
+  const clearTextInput = () => {
+    if (usernameRef.current) {
+      usernameRef.current.clear();
+    }
+    if (passwordRef.current) {
+      passwordRef.current.clear();
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <ImageBackground
+        source={require('../Sqlite/src/assets/img/login.jpg')}
+        resizeMode="cover"
+        style={styles.image}>
+        <Text style={styles.mainText}>Register/LogIn</Text>
+        <Greeting
+          greetingStyle={styles.greetingMessage}
+          loggedIn={loggedIn}
+          username={username}
+        />
+        <TextInput
+          ref={usernameRef}
+          onChangeText={newText => setUsername(newText)}
+          style={styles.inputText}
+          placeholder="Username"
+          placeholderTextColor={'white'}
+        />
+        <TextInput
+          ref={passwordRef}
+          onChangeText={newText => setPassword(newText)}
+          secureTextEntry={true}
+          style={styles.inputText}
+          placeholder="Password"
+          placeholderTextColor={'white'}
+        />
+        <View style={styles.buttonContainer}>
+          <Button
+            onPress={() => {
+              createTable();
+              register();
+              clearTextInput();
+            }}
+            title="Register"
+          />
+          <Button
+            onPress={() => {
+              login();
+              clearTextInput();
+            }}
+            title="Login"
+          />
+          <Button
+            onPress={() => {
+              deleteUsers();
+              setLoggedIn(false);
+            }}
+            color={'red'}
+            title="Delete all data in Users"
+          />
+        </View>
+      </ImageBackground>
+    </View>
+  );
+};
+
+const Test = () => {
+  return <Text>Testing</Text>;
+};
 
 const styles = StyleSheet.create({
   container: {
