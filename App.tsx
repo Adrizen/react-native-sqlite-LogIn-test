@@ -47,7 +47,6 @@ function App(): React.JSX.Element {
   const HomeScreen = ({navigation}: {navigation: any}) => {
     return (
       <View style={styles.container}>
-        {/* TODO: Meterle un buen fondo de pantallita. */}
         <ImageBackground
           source={require('../Sqlite/src/assets/img/mainscreen.jpg')}
           resizeMode="cover"
@@ -71,13 +70,12 @@ function App(): React.JSX.Element {
           name="Home"
           component={HomeScreen}
           options={{
-            title: 'Galaxy warriors',
+            title: 'Galaxy Warriors',
             headerTransparent: true,
             headerTintColor: 'white',
+            headerTitleAlign: 'center',
           }}
         />
-        {/* <Stack.Screen name="Profile" component={ProfileScreen} /> */}
-        {/* <Stack.Screen name="Test" component={Test} /> */}
         <Stack.Screen
           name="LogIn"
           component={LogInScreen}
@@ -87,12 +85,16 @@ function App(): React.JSX.Element {
             title: 'Register/Login',
           }}
         />
-        {/* <Stack.Screen name="Login" component={LoginScreen} /> */}
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
 
+// const RankingScreen = () => {
+
+// }
+
+// Screen that contains all the login, register, enter ranking and delete database logic.
 const LogInScreen = () => {
   // FIXME: 1° User logs in successfully. 2° Writes another username in the input. 3° The "Logged In as: [name]" changes in real time.
   const [username, setUsername] = useState('');
@@ -129,10 +131,24 @@ const LogInScreen = () => {
   const register = async () => {
     if (username.length > 0 && password.length > 0) {
       await db.transaction(async tx => {
-        tx.executeSql('INSERT INTO Users (Name, Password) VALUES (?, ?)', [
-          username,
-          password,
-        ]);
+        // Check if the user already exist.
+        tx.executeSql(
+          "SELECT * FROM Users WHERE Name = '" + username + "'",
+          [],
+          (_tx, results) => {
+            const len = results.rows.length;
+            if (len > 0) {
+              Alert.alert('Error', 'That username already exists', [
+                {text: 'OK'},
+              ]);
+            } else {
+              tx.executeSql(
+                'INSERT INTO Users (Name, Password) VALUES (?, ?)',
+                [username, password],
+              );
+            }
+          },
+        );
       });
       // Reset both.
       setUsername('');
@@ -205,6 +221,14 @@ const LogInScreen = () => {
     }
   };
 
+  const seeRanking = () => {
+    return (
+      <View>
+        <Text style={styles.customText}>Tuki master</Text>
+      </View>
+    );
+  };
+
   return (
     <View style={styles.container}>
       <ImageBackground
@@ -216,6 +240,7 @@ const LogInScreen = () => {
           loggedIn={loggedIn}
           username={username}
         />
+        <Text style={styles.customText}>Tuki master</Text>
         <TextInput
           ref={usernameRef}
           onChangeText={newText => setUsername(newText)}
@@ -250,6 +275,12 @@ const LogInScreen = () => {
           />
           <Button
             onPress={() => {
+              seeRanking();
+            }}
+            title="See ranking"
+          />
+          <Button
+            onPress={() => {
               deleteUsers();
               setLoggedIn(false);
             }}
@@ -269,13 +300,15 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     margin: 20,
+    gap: 20,
   },
   inputText: {
     height: 40,
     margin: 20,
+    fontWeight: '600',
     borderBottomWidth: 0.7,
     borderColor: 'white',
-    fontSize: 15,
+    fontSize: 17,
     color: 'white',
   },
   mainText: {
@@ -297,6 +330,11 @@ const styles = StyleSheet.create({
   image: {
     flex: 1,
     justifyContent: 'center',
+  },
+  customText: {
+    fontFamily: 'Press Start 2P',
+    fontSize: 40,
+    color: 'white',
   },
 });
 

@@ -1,0 +1,21 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "src/assets/fonts/press-start-2p-font/info.txt",
+      "sha1": "1f0d6ce83504328e07a87cb67fd14864001a51f4"
+    },
+    {
+      "path": "src/assets/fonts/press-start-2p-font/misc/FONTLOG-e017.txt",
+      "sha1": "e188664e0554c72f62a944654109ca543b233374"
+    },
+    {
+      "path": "src/assets/fonts/press-start-2p-font/misc/LICENSE-65f9.txt",
+      "sha1": "71ac8ce358ff36ef8560ef6f2f955ced92a53c04"
+    },
+    {
+      "path": "src/assets/fonts/press-start-2p-font/Press Start 2P.ttf",
+      "sha1": "91a2b00b578d4e50e9aed4b3c6dde937930860d5"
+    }
+  ]
+}
