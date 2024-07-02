@@ -74,15 +74,22 @@ function App(): React.JSX.Element {
             headerTransparent: true,
             headerTintColor: 'white',
             headerTitleAlign: 'center',
+            headerTitleStyle: {
+              fontFamily: 'Press Start 2P',
+              fontSize: 23,
+            },
           }}
         />
         <Stack.Screen
           name="LogIn"
           component={LogInScreen}
           options={{
+            title: 'Register/Login',
             headerTransparent: true,
             headerTintColor: 'white',
-            title: 'Register/Login',
+            headerTitleStyle: {
+              fontFamily: 'Press Start 2P',
+            },
           }}
         />
       </Stack.Navigator>
@@ -240,7 +247,6 @@ const LogInScreen = () => {
           loggedIn={loggedIn}
           username={username}
         />
-        <Text style={styles.customText}>Tuki master</Text>
         <TextInput
           ref={usernameRef}
           onChangeText={newText => setUsername(newText)}
@@ -300,7 +306,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     margin: 20,
-    gap: 20,
+    gap: 8,
   },
   inputText: {
     height: 40,
@@ -319,7 +325,8 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   greetingMessage: {
-    fontSize: 40,
+    fontFamily: 'Press Start 2P',
+    fontSize: 22,
     alignSelf: 'center',
     color: 'rgba(0, 246, 53, 0.9)',
     fontWeight: '600',
