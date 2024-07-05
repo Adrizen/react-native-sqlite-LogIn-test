@@ -92,17 +92,38 @@ function App(): React.JSX.Element {
             },
           }}
         />
+        <Stack.Screen
+          name="RankingScore"
+          component={RankingScoreScreen}
+          options={{
+            title: 'RankingScore',
+            headerTransparent: true,
+            headerTintColor: 'white',
+            headerTitleStyle: {
+              fontFamily: 'Press Start 2P',
+            },
+          }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
 
-// const RankingScreen = () => {
-
-// }
+function RankingScoreScreen() {
+  return (
+    <View>
+      <ImageBackground
+        source={require('./src/assets/img/ranking.jpeg')}
+        resizeMode="cover"
+        style={styles.image}>
+        <Text>Ranking Scores</Text>
+      </ImageBackground>
+    </View>
+  );
+}
 
 // Screen that contains all the login, register, enter ranking and delete database logic.
-const LogInScreen = () => {
+const LogInScreen = ({navigation}: {navigation: any}) => {
   // FIXME: 1° User logs in successfully. 2° Writes another username in the input. 3° The "Logged In as: [name]" changes in real time.
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -228,14 +249,6 @@ const LogInScreen = () => {
     }
   };
 
-  const seeRanking = () => {
-    return (
-      <View>
-        <Text style={styles.customText}>Tuki master</Text>
-      </View>
-    );
-  };
-
   return (
     <View style={styles.container}>
       <ImageBackground
@@ -280,9 +293,7 @@ const LogInScreen = () => {
             title="Login"
           />
           <Button
-            onPress={() => {
-              seeRanking();
-            }}
+            onPress={() => navigation.navigate('RankingScore')}
             title="See ranking"
           />
           <Button
