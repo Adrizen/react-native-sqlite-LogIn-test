@@ -46,7 +46,11 @@ const Greeting: React.FC<GreetingProps> = ({
       </View>
     );
   } else {
-    return <Text style={greetingStyle}>You need to LogIn.</Text>;
+    return (
+      <View>
+        <Text style={greetingStyle}>You need to LogIn.</Text>
+      </View>
+    );
   }
 };
 
@@ -344,21 +348,25 @@ const LogInScreen = ({navigation}: {navigation: any}) => {
           loggedIn={loggedIn}
           username={username}
         />
-        <TextInput
-          ref={usernameRef}
-          onChangeText={newText => setUsername(newText)}
-          style={styles.inputText}
-          placeholder="Username"
-          placeholderTextColor={'white'}
-        />
-        <TextInput
-          ref={passwordRef}
-          onChangeText={newText => setPassword(newText)}
-          secureTextEntry={true}
-          style={styles.inputText}
-          placeholder="Password"
-          placeholderTextColor={'white'}
-        />
+        {!loggedIn && (
+          <View>
+            <TextInput
+              ref={usernameRef}
+              onChangeText={newText => setUsername(newText)}
+              style={styles.inputText}
+              placeholder="Username"
+              placeholderTextColor={'white'}
+            />
+            <TextInput
+              ref={passwordRef}
+              onChangeText={newText => setPassword(newText)}
+              secureTextEntry={true}
+              style={styles.inputText}
+              placeholder="Password"
+              placeholderTextColor={'white'}
+            />
+          </View>
+        )}
         <View style={styles.buttonContainer}>
           <Button
             onPress={() => {
