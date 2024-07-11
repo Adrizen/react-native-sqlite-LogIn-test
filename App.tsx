@@ -65,7 +65,7 @@ function App(): React.JSX.Element {
           style={styles.image}>
           <View style={styles.buttonContainer}>
             <Button
-              title="Start game"
+              title="Launch"
               // onPress={() => navigation.navigate('Login', {name: 'Andy'})}
               onPress={() => navigation.navigate('LogIn')}
             />
@@ -374,7 +374,6 @@ const LogInScreen = ({navigation}: {navigation: any}) => {
                 }}
                 title="Register"
               />
-              {/* TODO: This could be changed to a "Logout" button when the user is LoggedIn */}
               <Button
                 onPress={() => {
                   login();
@@ -385,11 +384,17 @@ const LogInScreen = ({navigation}: {navigation: any}) => {
             </View>
           </View>
         )}
+        {loggedIn && (
+          <View style={styles.buttonContainer}>
+            <Button title="Start game" color={'green'} />
+          </View>
+        )}
         <View style={styles.buttonContainer}>
           <Button
             onPress={() => navigation.navigate('RankingScore')}
             title="See ranking"
           />
+          {/* TODO: For DEBUG only: comment the button below in production xd. */}
           <Button
             onPress={() => {
               deleteUsers();
