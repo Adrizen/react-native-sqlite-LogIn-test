@@ -365,25 +365,27 @@ const LogInScreen = ({navigation}: {navigation: any}) => {
               placeholder="Password"
               placeholderTextColor={'white'}
             />
+            <View style={styles.buttonContainer}>
+              <Button
+                onPress={() => {
+                  createTables();
+                  register();
+                  clearTextInput();
+                }}
+                title="Register"
+              />
+              {/* TODO: This could be changed to a "Logout" button when the user is LoggedIn */}
+              <Button
+                onPress={() => {
+                  login();
+                  clearTextInput();
+                }}
+                title="Login"
+              />
+            </View>
           </View>
         )}
         <View style={styles.buttonContainer}>
-          <Button
-            onPress={() => {
-              createTables();
-              register();
-              clearTextInput();
-            }}
-            title="Register"
-          />
-          {/* TODO: This could be changed to a "Logout" button when the user is LoggedIn */}
-          <Button
-            onPress={() => {
-              login();
-              clearTextInput();
-            }}
-            title="Login"
-          />
           <Button
             onPress={() => navigation.navigate('RankingScore')}
             title="See ranking"
