@@ -9,6 +9,7 @@ import {
   TextStyle,
   ViewStyle,
   ImageBackground,
+  FlatList,
 } from 'react-native';
 
 import {NavigationContainer} from '@react-navigation/native';
@@ -17,12 +18,19 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 const Stack = createNativeStackNavigator();
 
 import SQLite from 'react-native-sqlite-storage';
+import {SafeAreaView} from 'react-native-safe-area-context';
 
 // Define the prop interface.
+//TODO: Normalice uppercases in Username/username.
 interface GreetingProps {
   username: string;
   loggedIn: boolean;
   greetingStyle?: TextStyle | ViewStyle;
+}
+
+interface Score {
+  Username: string;
+  Score: number;
 }
 
 // Changes depending if the user is logged.
@@ -110,13 +118,85 @@ function App(): React.JSX.Element {
 }
 
 function RankingScoreScreen() {
+  const [scores, setScores] = useState<Score[]>([]);
+  const db = SQLite.openDatabase(
+    {
+      name: 'MainDB',
+      location: 'default',
+    },
+    () => {
+      console.log('DB opened - SCORES');
+    },
+    error => {
+      console.log('Error opening Database: ' + error);
+    },
+  );
+
+  useEffect(() => {
+    createMockValues();
+    fetchScores();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const createMockValues = () => {
+    db.transaction(tx => {
+      tx.executeSql(
+        'SELECT * FROM Scores',
+        [],
+        (_tx, results) => {
+          if (results.rows.length <= 0) {
+            tx.executeSql(
+              'INSERT INTO Scores (Username, Score) VALUES ("Andy", 10)',
+            );
+            tx.executeSql(
+              'INSERT INTO Scores (Username, Score) VALUES ("Tuki", 5)',
+            );
+            tx.executeSql(
+              'INSERT INTO Scores (Username, Score) VALUES ("Taka", 20)',
+            );
+          }
+        },
+        (_, error) => {
+          console.error('Error aasdasfasgasdas:', error);
+          return false;
+        },
+      );
+    });
+  };
+
+  const fetchScores = () => {
+    db.transaction(tx => {
+      tx.executeSql(
+        'SELECT * FROM Scores ORDER BY Score DESC',
+        [],
+        (_tx, results) => {
+          let temp: Score[] = [];
+          for (let i = 0; i < results.rows.length; i++) {
+            temp.push(results.rows.item(i) as Score);
+          }
+          setScores(temp);
+        },
+      );
+    });
+  };
+
   return (
-    <View>
+    <View style={styles.container}>
       <ImageBackground
-        source={require('./src/assets/img/ranking.jpeg')}
+        source={require('../Sqlite/src/assets/img/ranking.jpg')}
         resizeMode="cover"
         style={styles.image}>
-        <Text>Ranking Scores</Text>
+        <Text style={styles.greenText}>Ranking Scores</Text>
+        <SafeAreaView>
+          <FlatList
+            data={scores}
+            renderItem={({item}) => (
+              <Text style={styles.mainText}>
+                {item.Username}: {item.Score}
+              </Text>
+            )}
+          />
+        </SafeAreaView>
       </ImageBackground>
     </View>
   );
@@ -136,23 +216,26 @@ const LogInScreen = ({navigation}: {navigation: any}) => {
       location: 'default',
     },
     () => {
-      console.log('DB created');
+      console.log('DB opened - LogIn');
     },
     error => {
       console.log(error);
     },
   );
 
-  const createTable = () => {
+  const createTables = () => {
     db.transaction(tx => {
       tx.executeSql(
-        'CREATE TABLE IF NOT EXISTS Users (ID INTEGER PRIMARY KEY AUTOINCREMENT, Name TEXT, Password TEXT);',
+        'CREATE TABLE IF NOT EXISTS Users (ID INTEGER PRIMARY KEY AUTOINCREMENT, Username TEXT, Password TEXT);',
+      );
+      tx.executeSql(
+        'CREATE TABLE IF NOT EXISTS Scores (ID INTEGER PRIMARY KEY AUTOINCREMENT, Username TEXT, Score INTEGER);',
       );
     });
   };
 
   useEffect(() => {
-    createTable();
+    createTables();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -161,7 +244,7 @@ const LogInScreen = ({navigation}: {navigation: any}) => {
       await db.transaction(async tx => {
         // Check if the user already exist.
         tx.executeSql(
-          "SELECT * FROM Users WHERE Name = '" + username + "'",
+          "SELECT * FROM Users WHERE Username = '" + username + "'",
           [],
           (_tx, results) => {
             const len = results.rows.length;
@@ -171,8 +254,8 @@ const LogInScreen = ({navigation}: {navigation: any}) => {
               ]);
             } else {
               tx.executeSql(
-                'INSERT INTO Users (Name, Password) VALUES (?, ?)',
-                [username, password],
+                'INSERT INTO Users (Username, Password) VALUES (?, ?)',
+                [username, password], //TODO: Usar esto en el select de arriba para "safely insert into your SQL query" and prevent sql injection
               );
             }
           },
@@ -197,6 +280,7 @@ const LogInScreen = ({navigation}: {navigation: any}) => {
 
   const deleteUsers = () => {
     db.transaction(tx => {
+      tx.executeSql('DELETE FROM Scores');
       tx.executeSql('DELETE FROM Users');
     });
   };
@@ -205,7 +289,7 @@ const LogInScreen = ({navigation}: {navigation: any}) => {
     await db.transaction(async tx => {
       if (username.length > 0 && password.length > 0) {
         tx.executeSql(
-          "SELECT * FROM Users WHERE Name = '" +
+          "SELECT * FROM Users WHERE Username = '" +
             username +
             "' AND Password = '" +
             password +
@@ -256,7 +340,7 @@ const LogInScreen = ({navigation}: {navigation: any}) => {
         resizeMode="cover"
         style={styles.image}>
         <Greeting
-          greetingStyle={styles.greetingMessage}
+          greetingStyle={styles.greenText}
           loggedIn={loggedIn}
           username={username}
         />
@@ -278,7 +362,7 @@ const LogInScreen = ({navigation}: {navigation: any}) => {
         <View style={styles.buttonContainer}>
           <Button
             onPress={() => {
-              createTable();
+              createTables();
               register();
               clearTextInput();
             }}
@@ -329,13 +413,13 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   mainText: {
-    fontSize: 40,
-    fontStyle: 'italic',
+    fontFamily: 'Press Start 2P',
+    fontSize: 30,
     alignSelf: 'center',
+    fontWeight: '400',
     color: 'black',
-    fontWeight: '800',
   },
-  greetingMessage: {
+  greenText: {
     fontFamily: 'Press Start 2P',
     fontSize: 22,
     alignSelf: 'center',
