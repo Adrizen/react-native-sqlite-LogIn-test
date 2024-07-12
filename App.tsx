@@ -102,6 +102,7 @@ function App(): React.JSX.Element {
             title: 'Register/Login',
             headerTransparent: true,
             headerTintColor: 'white',
+            headerBackVisible: false,
             headerTitleStyle: {
               fontFamily: 'Press Start 2P',
             },
@@ -215,6 +216,7 @@ const LogInScreen = ({navigation}: {navigation: any}) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loggedIn, setLoggedIn] = useState(false);
+  const [muted, setMuted] = useState(false);
   const usernameRef = useRef<TextInput>(null);
   const passwordRef = useRef<TextInput>(null);
   const db = SQLite.openDatabase(
@@ -349,9 +351,10 @@ const LogInScreen = ({navigation}: {navigation: any}) => {
         <Pressable
           style={styles.containerTopRight}
           onPress={() => {
-            console.log('pressed xdd');
+            setMuted(!muted);
           }}>
-          <Icon name={'volume-up'} color={'white'} size={50} />
+          {muted && <Icon name={'volume-off'} color={'white'} size={50} />}
+          {!muted && <Icon name={'volume-up'} color={'white'} size={50} />}
         </Pressable>
         <Greeting
           greetingStyle={styles.greenText}
