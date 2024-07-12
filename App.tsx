@@ -10,10 +10,13 @@ import {
   ViewStyle,
   ImageBackground,
   FlatList,
+  BackHandler,
+  Pressable,
 } from 'react-native';
 
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 const Stack = createNativeStackNavigator();
 
@@ -66,7 +69,7 @@ function App(): React.JSX.Element {
           <View style={styles.buttonContainer}>
             <Button
               title="Launch"
-              // onPress={() => navigation.navigate('Login', {name: 'Andy'})}
+              // onPress={() => navigation.navigate('Login', {name: 'Andy'})}. Example while sending props
               onPress={() => navigation.navigate('LogIn')}
             />
           </View>
@@ -343,6 +346,13 @@ const LogInScreen = ({navigation}: {navigation: any}) => {
         source={require('../Sqlite/src/assets/img/login.jpg')}
         resizeMode="cover"
         style={styles.image}>
+        <Pressable
+          style={styles.containerTopRight}
+          onPress={() => {
+            console.log('pressed xdd');
+          }}>
+          <Icon name={'volume-up'} color={'white'} size={50} />
+        </Pressable>
         <Greeting
           greetingStyle={styles.greenText}
           loggedIn={loggedIn}
@@ -387,6 +397,11 @@ const LogInScreen = ({navigation}: {navigation: any}) => {
         {loggedIn && (
           <View style={styles.buttonContainer}>
             <Button title="Start game" color={'green'} />
+            <Button
+              title="Exit app"
+              onPress={() => BackHandler.exitApp()}
+              color={'red'}
+            />
           </View>
         )}
         <View style={styles.buttonContainer}>
@@ -413,6 +428,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'space-around',
+  },
+  containerTopRight: {
+    position: 'absolute',
+    alignSelf: 'center',
+    width: 50,
+    top: 50,
+    right: 0,
+  },
+  icon: {
+    color: 'white',
+  },
+  muteText: {
+    color: 'white',
+    fontSize: 20,
   },
   buttonContainer: {
     margin: 20,
