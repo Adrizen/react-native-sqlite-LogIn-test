@@ -216,7 +216,8 @@ const LogInScreen = ({navigation}: {navigation: any}) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loggedIn, setLoggedIn] = useState(false);
-  const [muted, setMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isDefaultLanguage, setIsDefaultLanguage] = useState(true);
   const usernameRef = useRef<TextInput>(null);
   const passwordRef = useRef<TextInput>(null);
   const db = SQLite.openDatabase(
@@ -351,10 +352,18 @@ const LogInScreen = ({navigation}: {navigation: any}) => {
         <Pressable
           style={styles.containerTopRight}
           onPress={() => {
-            setMuted(!muted);
+            setIsMuted(!isMuted);
           }}>
-          {muted && <Icon name={'volume-off'} color={'white'} size={50} />}
-          {!muted && <Icon name={'volume-up'} color={'white'} size={50} />}
+          {isMuted && <Icon name={'volume-off'} color={'white'} size={50} />}
+          {!isMuted && <Icon name={'volume-up'} color={'white'} size={50} />}
+        </Pressable>
+        <Pressable
+          style={styles.containerTopLeft}
+          onPress={() => {
+            console.log('change language xdd');
+            setIsDefaultLanguage(!isDefaultLanguage);
+          }}>
+          <Icon name={'language'} color={'white'} size={50} />
         </Pressable>
         <Greeting
           greetingStyle={styles.greenText}
@@ -436,8 +445,15 @@ const styles = StyleSheet.create({
     position: 'absolute',
     alignSelf: 'center',
     width: 50,
-    top: 50,
-    right: 0,
+    top: 60,
+    right: 10,
+  },
+  containerTopLeft: {
+    position: 'absolute',
+    alignSelf: 'center',
+    width: 50,
+    top: 60,
+    left: 10,
   },
   icon: {
     color: 'white',
