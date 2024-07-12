@@ -14,9 +14,11 @@ import {
   Pressable,
 } from 'react-native';
 
+// 3rd party libraries.
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import Sound from 'react-native-sound';
 
 const Stack = createNativeStackNavigator();
 
@@ -58,6 +60,39 @@ const Greeting: React.FC<GreetingProps> = ({
 };
 
 function App(): React.JSX.Element {
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+
+  const playBackgroundMusic = () => {
+    Sound.setCategory('Ambient');
+
+    const backgroundMusic = new Sound(
+      require('./src/assets/sounds/Alien.mp3'),
+      error => {
+        if (error) {
+          console.log('Failed to load the sound', error);
+          return;
+        }
+
+        backgroundMusic.setNumberOfLoops(-1);
+        backgroundMusic.play(success => {
+          if (success) {
+            setIsMusicPlaying(true);
+            console.log('Music is playing.');
+          } else {
+            console.log('Playback failed due to audio decoding errors');
+          }
+        });
+        backgroundMusic.release();
+      },
+    );
+  };
+
+  useEffect(() => {
+    if (!isMusicPlaying) {
+      playBackgroundMusic();
+    }
+  }, [isMusicPlaying]); //FIXME: Not sure if this here is okay.
+
   // eslint-disable-next-line react/no-unstable-nested-components
   const HomeScreen = ({navigation}: {navigation: any}) => {
     return (
