@@ -68,6 +68,11 @@ You've successfully run and modified your React Native App. :partying_face:
 
 If you can't get this to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
 
+# Local
+1. Open 2 console terminals:
+- In #1 go to **"cd C:\Users\guillermo.pereyra\AppData\Local\Android\Sdk\emulator\"** and then run **".\emulator.exe -avd Pixel_8_API_30 -netdelay none -netspeed full -wipe-data"** to start the Android emulator with that name.
+- In #2, while in the root folder and with the emulator up and ready, run **"nrp run android"**
+
 # Learn More
 
 To learn more about React Native, take a look at the following resources:
